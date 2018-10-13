@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Cart;
 use Illuminate\Http\Request;
+use Validator;
+use Response;
 
 class CartController extends Controller
 {
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'guestId' => 'required|',
-            'ip_address' => 'required|ip',
+            'guestId' => 'required',
+            'productId' => 'required',
+            'quantity' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -21,15 +25,16 @@ class CartController extends Controller
         }
         else
         {
-            $guest = new Guest();
-            $guest->token = $request['token'];
-            $guest->ip_address = $request['ip_address'];
-            $guest->save();
+            $cart = new Cart();
+            $cart->guestId = $request['guestId'];
+            $cart->productId = $request['productId'];
+            $cart->quantity = $request['quantity'];
+            $cart->save();
     
             return response()->json([
                 'status' => 'success',
                 'status_code' => 201,
-                'message' => 'Guest profile has been created'
+                'message' => 'Product has been added to cart'
             ]);
         }
     }
