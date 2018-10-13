@@ -18,10 +18,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// PRODUCTS
 Route::get('products', 'ProductController@index');
 Route::get('products/{product}', 'ProductController@show');
 Route::post('products', 'ProductController@store');
 Route::put('products/{product}', 'ProductController@update');
 Route::delete('products/{product}', 'ProductController@delete');
 
+// GUEST 
 Route::post('guest', 'GuestController@store');
+
+// CART
+Route::post('cart/add', 'CartController@store');
