@@ -24,4 +24,4 @@ Route::post('products', 'ProductController@store');
 Route::put('products/{product}', 'ProductController@update');
 Route::delete('products/{product}', 'ProductController@delete');
 
-Route::get('guest', 'GuestController@store');
+Route::post('guest', 'GuestController@store');
