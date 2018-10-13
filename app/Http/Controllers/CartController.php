@@ -9,7 +9,7 @@ class CartController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'token' => 'required|unique:guests|size:15',
+            'guestId' => 'required|',
             'ip_address' => 'required|ip',
         ]);
         if ($validator->fails()) {
