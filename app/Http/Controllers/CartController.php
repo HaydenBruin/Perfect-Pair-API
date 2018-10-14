@@ -15,21 +15,24 @@ class CartController extends Controller
         $cart = json_decode(@$_COOKIE['cart'], true);
         $products = array();
 
-        foreach($cart as $cartProduct)
+        if(@$cart)
         {
-            $product = array();
-            $getProduct = Product::find($cartProduct['productId']);
-            $product['_cart']['productId'] = $cartProduct['productId'];
-            $product['_cart']['quantity'] = $cartProduct['quantity'];
-            $product['id'] = $getProduct->id;
-            $product['title'] = $getProduct->title;
-            $product['image'] = $getProduct->image;
-            $product['description'] = $getProduct->description;
-            $product['price'] = $getProduct->price;
-            $product['salePrice'] = $getProduct->salePrice;
-            $product['inventory'] = $getProduct->inventory;
-            $product['slug'] = $getProduct->slug;
-            $products[] = $product;
+            foreach($cart as $cartProduct)
+            {
+                $product = array();
+                $getProduct = Product::find($cartProduct['productId']);
+                $product['_cart']['productId'] = $cartProduct['productId'];
+                $product['_cart']['quantity'] = $cartProduct['quantity'];
+                $product['id'] = $getProduct->id;
+                $product['title'] = $getProduct->title;
+                $product['image'] = $getProduct->image;
+                $product['description'] = $getProduct->description;
+                $product['price'] = $getProduct->price;
+                $product['salePrice'] = $getProduct->salePrice;
+                $product['inventory'] = $getProduct->inventory;
+                $product['slug'] = $getProduct->slug;
+                $products[] = $product;
+            }
         }
 
         return response()->json([
