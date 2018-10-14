@@ -29,4 +29,5 @@ Route::delete('products/{product}', 'ProductController@delete');
 Route::post('guest', 'GuestController@store');
 
 // CART
-Route::post('cart/add', 'CartController@store');
+Route::get('cart', 'CartController@getCart');
+Route::post('cart/add', 'CartController@addToCart');
