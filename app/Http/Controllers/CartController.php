@@ -42,6 +42,21 @@ class CartController extends Controller
         ]);
     }
 
+    public function removeFromCart(Request $request)
+    {
+        if(isset($_COOKIE['cart'])) {
+            $cart = $_COOKIE['cart'];
+            unset($cart[$request['productId']]);
+            setcookie('cart',json_encode($cart),time() + (86400 * 30));
+        }
+    
+        return response()->json([
+            'status' => 'success',
+            'status_code' => 201,
+            'cart' => $cart
+        ]);
+    }
+
     public function addToCart(Request $request)
     {
         if(!isset($_COOKIE['cart'])) {

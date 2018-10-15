@@ -31,3 +31,4 @@ Route::post('guest', 'GuestController@store');
 // CART
 Route::get('cart', 'CartController@getCart');
 Route::post('cart/add', 'CartController@addToCart');
+Route::post('cart/remove', 'CartController@removeFromCart');
