@@ -12,12 +12,18 @@ class CartController extends Controller
 {
     public function getCart(Request $request)
     {
-        $cart = json_decode(@$_COOKIE['cart'], true);
-        $products = array();
+        $cartProducts = json_decode(@$_COOKIE['cart'], true);
+        $cart = array(
+            'cart' => [
+                'totalPrice' => 0.00,
+                'totalSavings' => 0.00
+            ],
+            'products' => []
+        );
 
-        if(@$cart)
+        if(@$cartProducts)
         {
-            foreach($cart as $cartProduct)
+            foreach($cartProducts as $cartProduct)
             {
                 $product = array();
                 $getProduct = Product::find($cartProduct['productId']);
@@ -31,14 +37,18 @@ class CartController extends Controller
                 $product['salePrice'] = $getProduct->salePrice;
                 $product['inventory'] = $getProduct->inventory;
                 $product['slug'] = $getProduct->slug;
-                $products[] = $product;
+                $cart['products'][] = $product;
+
+                // UPDATE TOTAL PRICING
+                $cart['cart']['totalPrice'] += $getProduct->salePrice ? $getProduct->salePrice : $getProduct->price;
+                $cart['cart']['totalSavings'] += $getProduct->price - ($getProduct->salePrice ? $getProduct->salePrice : $getProduct->price);
             }
         }
 
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => $products
+            'cart' => $cart
         ]);
     }
 
