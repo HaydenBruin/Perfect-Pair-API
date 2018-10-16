@@ -14,7 +14,7 @@ class CartController extends Controller
     {
         $cartProducts = json_decode(@$_COOKIE['cart'], true);
         $cart = array(
-            'cart' => [
+            'overview' => [
                 'totalPrice' => 0.00,
                 'totalSavings' => 0.00
             ],
@@ -33,16 +33,18 @@ class CartController extends Controller
                 $product['title'] = $getProduct->title;
                 $product['image'] = $getProduct->image;
                 $product['description'] = $getProduct->description;
-                $product['price'] = $getProduct->price;
-                $product['salePrice'] = $getProduct->salePrice;
+                $product['price'] = number_format($getProduct->price,2);
+                $product['saleprice'] = number_format($getProduct->saleprice,2);
                 $product['inventory'] = $getProduct->inventory;
                 $product['slug'] = $getProduct->slug;
                 $cart['products'][] = $product;
 
                 // UPDATE TOTAL PRICING
-                $cart['cart']['totalPrice'] += $getProduct->salePrice ? $getProduct->salePrice : $getProduct->price;
-                $cart['cart']['totalSavings'] += $getProduct->price - ($getProduct->salePrice ? $getProduct->salePrice : $getProduct->price);
+                $cart['overview']['totalPrice'] += $getProduct->saleprice ? $getProduct->saleprice : $getProduct->price;
+                $cart['overview']['totalSavings'] += $getProduct->price - ($getProduct->saleprice ? $getProduct->saleprice : $getProduct->price);
             }
+            $cart['overview']['totalPrice'] = number_format($cart['overview']['totalPrice'], 2);
+            $cart['overview']['totalSavings'] = number_format($cart['overview']['totalSavings'], 2);
         }
 
         return response()->json([
@@ -54,11 +56,13 @@ class CartController extends Controller
 
     public function removeFromCart(Request $request)
     {
-        if(isset($_COOKIE['cart'])) {
-            $cart = $_COOKIE['cart'];
-            unset($cart[$request['productId']]);
-            setcookie('cart',json_encode($cart),time() + (86400 * 30));
+        $cart = json_decode(@$_COOKIE['cart'],true);
+        foreach($cart as $key => $value) {
+            if (in_array($request['productId'], $value)) {
+                unset($cart[$key]);
+            }
         }
+        setcookie('cart',json_encode($cart),time() + (86400 * 30));
     
         return response()->json([
             'status' => 'success',
@@ -72,8 +76,8 @@ class CartController extends Controller
         if(!isset($_COOKIE['cart'])) {
             $cart = array();
             $cart[$request['productId']] = array(
-                'productId' => $request['productId'],
-                'quantity' => $request['quantity']
+                'productId' => intval($request['productId']),
+                'quantity' => intval($request['quantity'])
             );
             setcookie('cart',json_encode($cart),time() + (86400 * 30));
         }
@@ -81,8 +85,8 @@ class CartController extends Controller
         {
             $cart = json_decode($_COOKIE['cart'], true);
             $cart[$request['productId']] = array(
-                'productId' => $request['productId'],
-                'quantity' => $request['quantity']
+                'productId' => intval($request['productId']),
+                'quantity' => intval($request['quantity'])
             );
             setcookie('cart',json_encode($cart),time() + (86400 * 30));
         }
