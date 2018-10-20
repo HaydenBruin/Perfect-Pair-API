@@ -7,34 +7,13 @@ use Illuminate\Http\Request;
  
 class ProductController extends Controller
 {
-    public function index()
+    public function getProducts()
     {
-        return Product::all();
+        return Product::paginate(10);
     }
 
-    public function show(Product $product)
+    public function getProduct(Product $product)
     {
         return $product;
-    }
-
-    public function store(Request $request)
-    {
-        $product = Product::create($request->all());
-
-        return response()->json($product, 201);
-    }
-
-    public function update(Request $request, Product $product)
-    {
-        $product->update($request->all());
-
-        return response()->json($product, 200);
-    }
-
-    public function delete(Product $product)
-    {
-        $product->delete();
-
-        return response()->json(null, 204);
     }
 }
