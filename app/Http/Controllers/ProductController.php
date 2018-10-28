@@ -9,7 +9,7 @@ class ProductController extends Controller
 {
     public function getProducts()
     {
-        return Product::paginate(10);
+        return Product::where('enabled','=','1')->paginate(25);
     }
 
     public function getProduct(Product $product)

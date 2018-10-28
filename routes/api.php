@@ -29,3 +29,7 @@ Route::post('guest', 'GuestController@store');
 Route::get('cart', 'CartController@getCart');
 Route::post('cart/add', 'CartController@addToCart');
 Route::post('cart/remove', 'CartController@removeFromCart');
+
+// CHECKOUT
+Route::post('checkout/email', 'CheckoutController@updateEmail');
+Route::post('checkout/address', 'CheckoutController@updateAddress');

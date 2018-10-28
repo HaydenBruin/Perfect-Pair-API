@@ -16,10 +16,10 @@ class CreateCheckoutsTable extends Migration
         Schema::create('checkouts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('email_address');
-            $table->string('address');
-            $table->string('suburb');
-            $table->string('city');
-            $table->integer('postcode');
+            $table->string('address')->nullable(true);
+            $table->string('suburb')->nullable(true);
+            $table->string('city')->nullable(true);
+            $table->integer('postcode')->nullable(true);
             $table->timestamps();
         });
     }
