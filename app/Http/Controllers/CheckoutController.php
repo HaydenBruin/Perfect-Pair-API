@@ -16,7 +16,6 @@ class CheckoutController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'request' => $request,
                 'status' => 'failed',
                 'status_code' => 400,
                 'message' => 'Email address is either not unique or not valid'
