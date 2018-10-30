@@ -39,6 +39,29 @@ class CheckoutController extends Controller
         }
     }
 
+    public function updatePayment(Request $request)
+    {
+        $checkoutId = session('checkoutId');
+        if(!session()->has('checkoutId'))
+        {
+            return response()->json([
+                'status' => 'failed',
+                'status_code' => 400,
+                'message' => 'checkoutId session stoken does not exist'
+            ]);
+        }
+        \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
+        $charge = \Stripe\Charge::create(['amount' => 2000, 'currency' => 'nzd', 'source' => 'tok_189fqt2eZvKYlo2CTGBeg6Uq']);
+        echo $charge;
+        
+        return response()->json([
+            'status' => 'success',
+            'status_code' => 201,
+            'message' => 'Checkout order has been created & email saved'
+        ]);
+        
+    }
+
     public function updateAddress(Request $request)
     {
         $checkoutId = session('checkoutId');

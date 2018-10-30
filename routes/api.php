@@ -32,4 +32,5 @@ Route::post('cart/remove', 'CartController@removeFromCart');
 
 // CHECKOUT
 Route::post('checkout/email', 'CheckoutController@updateEmail');
+Route::post('checkout/payment', 'CheckoutController@updatePayment');
 Route::post('checkout/address', 'CheckoutController@updateAddress');
