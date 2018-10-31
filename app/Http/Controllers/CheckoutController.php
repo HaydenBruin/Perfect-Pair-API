@@ -27,11 +27,10 @@ class CheckoutController extends Controller
             $checkout->email_address = $request['email_address'];
             $checkout->save();
 
-            session([
-                'checkoutId' => $checkout->id
-            ]);
+            $request->session()->put('checkoutId', $checkout->id);
     
             return response()->json([
+                'checkoutId' => $checkout->id,
                 'status' => 'success',
                 'status_code' => 201,
                 'message' => 'Checkout order has been created & email saved'
@@ -41,25 +40,36 @@ class CheckoutController extends Controller
 
     public function updatePayment(Request $request)
     {
-        $checkoutId = session('checkoutId');
-        if(!session()->has('checkoutId'))
+        $checkoutId = $request->session()->get('checkoutId');
+        if(!$request->session()->has('checkoutId'))
         {
             return response()->json([
                 'status' => 'failed',
                 'status_code' => 400,
-                'message' => 'checkoutId session stoken does not exist'
+                'message' => 'checkoutId session token does not exist'
             ]);
         }
-        \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
-        $charge = \Stripe\Charge::create(['amount' => 2000, 'currency' => 'nzd', 'source' => 'tok_189fqt2eZvKYlo2CTGBeg6Uq']);
-        echo $charge;
-        
+
+        // TAKE PAYMENT
+        if(@$request['tokenId'])
+        {
+            \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
+            $charge = \Stripe\Charge::create(['amount' => 2000, 'currency' => 'nzd', 'source' => $request['tokenId']]);
+            
+            return response()->json([
+                'charge' => $charge,
+                'status' => 'success',
+                'status_code' => 201,
+                'message' => 'Checkout order has been created & email saved'
+            ]);
+        }
+
         return response()->json([
-            'status' => 'success',
-            'status_code' => 201,
-            'message' => 'Checkout order has been created & email saved'
+            'request' => $request,
+            'status' => 'failed',
+            'status_code' => 400,
+            'message' => 'Payment was not processed'
         ]);
-        
     }
 
     public function updateAddress(Request $request)
@@ -70,7 +80,7 @@ class CheckoutController extends Controller
             return response()->json([
                 'status' => 'failed',
                 'status_code' => 400,
-                'message' => 'checkoutId session stoken does not exist'
+                'message' => 'checkoutId session token does not exist'
             ]);
         }
 
