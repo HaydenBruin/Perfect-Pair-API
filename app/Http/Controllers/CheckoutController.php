@@ -25,6 +25,7 @@ class CheckoutController extends Controller
         {
             $checkout = new Checkout();
             $checkout->email_address = $request['email_address'];
+            $checkout->status = "Pending";
             $checkout->save();
 
             $request->session()->put('checkoutId', $checkout->id);
@@ -56,6 +57,10 @@ class CheckoutController extends Controller
             \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
             $charge = \Stripe\Charge::create(['amount' => 2000, 'currency' => 'nzd', 'source' => $request['tokenId']]);
             
+            $checkout = Checkout::find($checkoutId);
+            $checkout->status = "Success";
+            $checkout->save();
+
             return response()->json([
                 'charge' => $charge,
                 'status' => 'success',
@@ -109,7 +114,7 @@ class CheckoutController extends Controller
             return response()->json([
                 'status' => 'success',
                 'status_code' => 201,
-                'message' => 'Checkout order has been created & email saved'
+                'message' => 'Delivery address updated'
             ]);
         }
     }
