@@ -12,13 +12,13 @@ class CheckoutController extends Controller
     public function updateEmail(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email_address' => 'required|unique:checkouts'
+            'email_address' => 'required|email'
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'failed',
                 'status_code' => 400,
-                'message' => 'Email address is either not unique or not valid'
+                'message' => 'Email address is not valid'
             ]);
         }
         else
