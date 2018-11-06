@@ -16,7 +16,7 @@ class ModifyHeadersMiddleware
     public function handle( $request, Closure $next )
     {
         $response = $next( $request );
-        $response->header( 'Access-Control-Allow-Origin', 'http://127.0.0.1:3000' );
+        $response->header( 'Access-Control-Allow-Origin', '*' );
         $response->header( 'Access-Control-Allow-Headers', 'Origin, Content-Type' );
         $response->header( 'Access-Control-Allow-Credentials', 'true');
 
