@@ -90,6 +90,7 @@ class CheckoutController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'fullname' => 'required|string',
             'address' => 'required|string',
             'suburb' => 'required|string',
             'city' => 'required|string',
@@ -105,6 +106,7 @@ class CheckoutController extends Controller
         else
         {
             $checkout = Checkout::find($checkoutId);
+            $checkout->fullname = $request['fullname'];
             $checkout->address = $request['address'];
             $checkout->suburb = $request['suburb'];
             $checkout->city = $request['city'];
