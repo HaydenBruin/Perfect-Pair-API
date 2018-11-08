@@ -10,8 +10,7 @@ use Response;
 
 class CartController extends Controller
 {
-    public function getCart(Request $request)
-    {
+    private function getCartData() {
         $cartProducts = json_decode(@$_COOKIE['cart'], true);
         $cart = array(
             'overview' => [
@@ -22,7 +21,7 @@ class CartController extends Controller
             'products' => []
         );
 
-        if(@$cartProducts)
+        if(@$cartProducts && is_array(@$cartProducts))
         {
             foreach($cartProducts as $cartProduct)
             {
@@ -53,11 +52,15 @@ class CartController extends Controller
             $cart['overview']['totalSavings'] = number_format($cart['overview']['totalSavings'], 2);
             $cart['overview']['totalFullPrice'] = number_format($cart['overview']['totalSavings'] + $cart['overview']['totalPrice'], 2);
         }
+        return $cart;
+    }
 
+    public function getCart(Request $request)
+    {
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => $cart
+            'cart' => $this->getCartData()
         ]);
     }
 
@@ -74,7 +77,7 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => $cart
+            'cart' => $this->getCartData()
         ]);
     }
 
@@ -101,37 +104,7 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => $cart
+            'cart' => $this->getCartData()
         ]);
     }
-
-    /*public function dbstore(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'guestId' => 'required',
-            'productId' => 'required',
-            'quantity' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'status_code' => 400,
-                'message' => 'Validation failed, please check your input'
-            ]);
-        }
-        else
-        {
-            $cart = new Cart();
-            $cart->guestId = $request['guestId'];
-            $cart->productId = $request['productId'];
-            $cart->quantity = $request['quantity'];
-            $cart->save();
-    
-            return response()->json([
-                'status' => 'success',
-                'status_code' => 201,
-                'message' => 'Product has been added to cart'
-            ]);
-        }
-    }*/
 }
