@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Checkout;
 use Illuminate\Http\Request;
+use App\Traits\CartData;
 use Validator;
 use Response;
 
@@ -42,6 +43,10 @@ class CheckoutController extends Controller
     public function updatePayment(Request $request)
     {
         $checkoutId = $request->session()->get('checkoutId');
+        
+        $cartData = CartData::getCartData();
+        print_r($cartData);
+        die();
         if(!$request->session()->has('checkoutId'))
         {
             return response()->json([
