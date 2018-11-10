@@ -41,7 +41,7 @@ class CartController extends Controller
     public function addToCart(Request $request)
     {
         $cart = array();
-        if(Cookie::get('cart')) {
+        if(!Cookie::get('cart')) {
             $cart = array();
             $cart[$request['productId']] = array(
                 'productId' => intval($request['productId']),
