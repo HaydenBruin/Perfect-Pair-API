@@ -1,3 +1,3 @@
 <?php
-echo 'automatic deployment';
+echo 'automatic deployment - 123';
 ?>
