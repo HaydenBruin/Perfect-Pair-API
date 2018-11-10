@@ -28,12 +28,12 @@ Route::group(['middleware' => ['web']], function () {
 
     // CART
     Route::get('cart', 'CartController@getCart');
-    Route::any('cart/add', 'CartController@addToCart');
+    Route::post('cart/add', 'CartController@addToCart');
     Route::post('cart/remove', 'CartController@removeFromCart');
 
     // CHECKOUT
     Route::post('checkout/email', 'CheckoutController@updateEmail');
-    Route::any('checkout/payment', 'CheckoutController@updatePayment');
+    Route::post('checkout/payment', 'CheckoutController@updatePayment');
     Route::post('checkout/address', 'CheckoutController@updateAddress');
 
 });
