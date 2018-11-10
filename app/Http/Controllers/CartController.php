@@ -34,12 +34,13 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData()
+            'cart' => CartData::getCartData($cart)
         ]);
     }
 
     public function addToCart(Request $request)
     {
+        $cart = array();
         if(Cookie::get('cart')) {
             $cart = array();
             $cart[$request['productId']] = array(
@@ -55,12 +56,12 @@ class CartController extends Controller
                 'quantity' => intval($request['quantity'])
             );
         }
-        Cookie::make('cart', json_encode($cart), time() + (86400 * 30));
+        Cookie::queue('cart', json_encode($cart), time() + (86400 * 30));
     
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData()
+            'cart' => CartData::getCartData($cart)
         ]);
     }
 }

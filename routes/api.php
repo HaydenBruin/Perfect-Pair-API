@@ -18,19 +18,22 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// PRODUCTS
-Route::get('products', 'ProductController@getProducts');
-Route::get('products/{product}', 'ProductController@getProduct');
+Route::group(['middleware' => ['web']], function () {
+    // PRODUCTS
+    Route::get('products', 'ProductController@getProducts');
+    Route::get('products/{product}', 'ProductController@getProduct');
 
-// GUEST 
-Route::post('guest', 'GuestController@store');
+    // GUEST 
+    Route::post('guest', 'GuestController@store');
 
-// CART
-Route::get('cart', 'CartController@getCart');
-Route::any('cart/add', 'CartController@addToCart');
-Route::post('cart/remove', 'CartController@removeFromCart');
+    // CART
+    Route::get('cart', 'CartController@getCart');
+    Route::any('cart/add', 'CartController@addToCart');
+    Route::post('cart/remove', 'CartController@removeFromCart');
 
-// CHECKOUT
-Route::post('checkout/email', 'CheckoutController@updateEmail');
-Route::any('checkout/payment', 'CheckoutController@updatePayment');
-Route::post('checkout/address', 'CheckoutController@updateAddress');
+    // CHECKOUT
+    Route::post('checkout/email', 'CheckoutController@updateEmail');
+    Route::any('checkout/payment', 'CheckoutController@updatePayment');
+    Route::post('checkout/address', 'CheckoutController@updateAddress');
+
+});

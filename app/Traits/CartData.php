@@ -5,9 +5,12 @@ use App\Product;
 use Illuminate\Support\Facades\Cookie;
 
 trait CartData {
-    public static function getCartData() {
-        //$cartProducts = json_decode(@$_COOKIE['cart'], true);
+    public static function getCartData($updatedCart = array()) {
         $cartProducts = json_decode(Cookie::get('cart'),true);
+        if(@$updatedCart)
+        {
+            $cartProducts = $updatedCart;
+        }
         $cart = array(
             'overview' => [
                 'totalPrice' => 0.00,
