@@ -17,31 +17,32 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData()
+            'cart' => CartData::getCartData($request->cookie('cart'))
         ]);
     }
 
     public function removeFromCart(Request $request)
     {
-        $cart = json_decode(Cookie::get('cart'),true);
-        foreach($cart as $key => $value) {
-            if (in_array($request['productId'], $value)) {
-                unset($cart[$key]);
+        $cart = json_decode($request->cookie('cart'),true);
+        if(@$cart)
+        {
+            foreach($cart as $key => $value) {
+                if (in_array($request['productId'], $value)) {
+                    unset($cart[$key]);
+                }
             }
         }
-        Cookie::make('cart', json_encode($cart), time() + (86400 * 30));
-    
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
             'cart' => CartData::getCartData($cart)
-        ]);
+        ])->cookie('cart', json_encode($cart), time() + (86400 * 30));
     }
 
     public function addToCart(Request $request)
     {
         $cart = array();
-        if(!Cookie::get('cart')) {
+        if(!$request->cookie('cart')) {
             $cart = array();
             $cart[$request['productId']] = array(
                 'productId' => intval($request['productId']),
@@ -50,18 +51,17 @@ class CartController extends Controller
         }
         else 
         {
-            $cart = json_decode(Cookie::get('cart'), true);
+            $cart = json_decode($request->cookie('cart'), true);
             $cart[$request['productId']] = array(
                 'productId' => intval($request['productId']),
                 'quantity' => intval($request['quantity'])
             );
         }
-        Cookie::queue('cart', json_encode($cart), time() + (86400 * 30));
     
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
             'cart' => CartData::getCartData($cart)
-        ]);
+        ])->cookie('cart', json_encode($cart), time() + (86400 * 30));
     }
 }
