@@ -66,6 +66,15 @@ class CheckoutController extends Controller
                 $checkout->status = "Success";
                 $checkout->save();
 
+                if(@$checkout->email_address)
+                {
+                    Mail::to($checkout->email_address)
+                    ->queue(new App\Mail\OrderCompleted($checkout));
+
+                    Mail::to(explode(',', env('MAIL_ADMIN')))
+                    ->queue(new App\Mail\OrderCompletedAdmin($checkout));
+                }
+
                 return response()->json([
                     'status' => 'success',
                     'status_code' => 201,

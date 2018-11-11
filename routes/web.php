@@ -11,6 +11,13 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+
+
+Route::get('/mailable', function () {
+    
+
+    //Mail::to(explode(',', env('MAIL_ADMIN')))
+    //->queue(new App\Mail\OrderCompleted());
+
+    return new App\Mail\OrderCompleted();
 });
