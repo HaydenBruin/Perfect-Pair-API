@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Checkout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use App\Traits\CartData;
 use Validator;
 use Response;
@@ -43,11 +44,8 @@ class CheckoutController extends Controller
     public function updatePayment(Request $request)
     {
         $checkoutId = $request->session()->get('checkoutId');
-        
-        $cartData = CartData::getCartData();
-        print_r($cartData);
-        die();
-        if(!$request->session()->has('checkoutId'))
+        $cartData = CartData::getCartData($request->cookie('cart'));
+        if(!$request->session()->has('checkoutId') || !@$cartData)
         {
             return response()->json([
                 'status' => 'failed',
@@ -60,18 +58,29 @@ class CheckoutController extends Controller
         if(@$request['tokenId'])
         {
             \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
-            $charge = \Stripe\Charge::create(['amount' => 2000, 'currency' => 'nzd', 'source' => $request['tokenId']]);
+            echo $cartData['overview']['totalPrice'] * 100;
+            die();
+            $charge = \Stripe\Charge::create(['amount' => ($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
             
-            $checkout = Checkout::find($checkoutId);
-            $checkout->status = "Success";
-            $checkout->save();
+            if(@$charge['paid'])
+            {
+                $checkout = Checkout::find($checkoutId);
+                $checkout->status = "Success";
+                $checkout->save();
 
-            return response()->json([
-                'charge' => $charge,
-                'status' => 'success',
-                'status_code' => 201,
-                'message' => 'Checkout order has been created & email saved'
-            ]);
+                return response()->json([
+                    'status' => 'success',
+                    'status_code' => 201,
+                    'message' => 'Checkout order has been created & email saved'
+                ])->withCookie(Cookie::forget('cart'));
+            }
+            else {
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'message' => 'Payment method has failed'
+                ]);    
+            }
         }
 
         return response()->json([
