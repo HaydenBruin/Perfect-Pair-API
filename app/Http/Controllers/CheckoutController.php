@@ -58,8 +58,6 @@ class CheckoutController extends Controller
         if(@$request['tokenId'])
         {
             \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
-            echo $cartData['overview']['totalPrice'] * 100;
-            die();
             $charge = \Stripe\Charge::create(['amount' => ($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
             
             if(@$charge['paid'])
