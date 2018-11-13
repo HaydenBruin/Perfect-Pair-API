@@ -6,6 +6,8 @@ use App\Checkout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use App\Traits\CartData;
+use DB;
+use Mail;
 use Validator;
 use Response;
 
@@ -43,6 +45,7 @@ class CheckoutController extends Controller
 
     public function updatePayment(Request $request)
     {
+        
         $checkoutId = $request->session()->get('checkoutId');
         $cartData = CartData::getCartData($request->cookie('cart'));
         if(!$request->session()->has('checkoutId') || !@$cartData)
@@ -66,13 +69,26 @@ class CheckoutController extends Controller
                 $checkout->status = "Success";
                 $checkout->save();
 
+                if(@$cartData['products'])
+                {
+                    foreach($cartData['products'] as $product)
+                    {
+                        DB::table('checkouts_items')->insert([
+                            'checkoutId' => $checkoutId,
+                            'productId' => $product['_cart']['productId'],
+                            'quantity' => $product['_cart']['quantity'],
+                            'shipped' => false
+                        ]);
+                    }
+                }
+
                 if(@$checkout->email_address)
                 {
                     Mail::to($checkout->email_address)
-                    ->queue(new App\Mail\OrderCompleted($checkout));
+                    ->queue(new \App\Mail\OrderCompleted($checkout));
 
                     Mail::to(explode(',', env('MAIL_ADMIN')))
-                    ->queue(new App\Mail\OrderCompletedAdmin($checkout));
+                    ->queue(new \App\Mail\OrderCompletedAdmin($checkout));
                 }
 
                 return response()->json([
@@ -91,7 +107,6 @@ class CheckoutController extends Controller
         }
 
         return response()->json([
-            'request' => $request,
             'status' => 'failed',
             'status_code' => 400,
             'message' => 'Payment was not processed'

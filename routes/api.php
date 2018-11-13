@@ -27,9 +27,9 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('guest', 'GuestController@store');
 
     // CART
-    Route::any('cart', 'CartController@getCart');
-    Route::any('cart/add', 'CartController@addToCart');
-    Route::any('cart/remove', 'CartController@removeFromCart');
+    Route::get('cart', 'CartController@getCart');
+    Route::post('cart/add', 'CartController@addToCart');
+    Route::post('cart/remove', 'CartController@removeFromCart');
 
     // CHECKOUT
     Route::post('checkout/email', 'CheckoutController@updateEmail');

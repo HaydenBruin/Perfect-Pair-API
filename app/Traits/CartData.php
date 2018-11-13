@@ -8,7 +8,7 @@ trait CartData {
     public static function getCartData($cartProducts) {
         if(is_array(@$cartProducts)) $cartProducts = json_encode($cartProducts);
         $cartProducts = json_decode($cartProducts,true);
-        
+
         $cart = array(
             'overview' => [
                 'totalPrice' => 0.00,
@@ -51,7 +51,6 @@ trait CartData {
             $cart['overview']['totalSavings'] = number_format($cart['overview']['totalSavings'], 2);
             $cart['overview']['totalFullPrice'] = number_format($cart['overview']['totalSavings'] + $cart['overview']['totalPrice'], 2);
         }
-
         return $cart;
     }
 }
