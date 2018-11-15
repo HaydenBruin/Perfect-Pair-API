@@ -42,8 +42,11 @@ trait CartData {
                     // UPDATE TOTAL PRICING
                     for($i = 0; $i < $cartProduct['quantity']; $i++)
                     {
-                        $cart['overview']['totalPrice'] += $getProduct->saleprice ? $getProduct->saleprice : $getProduct->price;
-                        $cart['overview']['totalSavings'] += $getProduct->price - ($getProduct->saleprice ? $getProduct->saleprice : $getProduct->price);
+                        //$cart['overview']['totalPrice'] += $getProduct->saleprice ? $getProduct->saleprice : $getProduct->price;
+                        //$cart['overview']['totalSavings'] += $getProduct->price - ($getProduct->saleprice ? $getProduct->saleprice : $getProduct->price);
+                        $cart['overview']['totalPrice'] += $getProduct->price;
+                        $cart['overview']['totalSavings'] = 0;
+                        
                     }
                 }
             }
