@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Checkout;
+use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use App\Traits\CartData;
@@ -45,9 +46,9 @@ class CheckoutController extends Controller
 
     public function updatePayment(Request $request)
     {
-        
         $checkoutId = $request->session()->get('checkoutId');
         $cartData = CartData::getCartData($request->cookie('cart'));
+
         if(!$request->session()->has('checkoutId') || !@$cartData)
         {
             return response()->json([
@@ -73,11 +74,19 @@ class CheckoutController extends Controller
                 {
                     foreach($cartData['products'] as $product)
                     {
+                        $fullProduct = Product::find($product['_cart']['productId']);
+
                         DB::table('checkouts_items')->insert([
                             'checkoutId' => $checkoutId,
                             'productId' => $product['_cart']['productId'],
                             'quantity' => $product['_cart']['quantity'],
                             'shipped' => false
+                        ]);
+
+                        DB::table('products')
+                        ->where('id', $fullProduct['id'])
+                        ->update([
+                            'inventory' => $fullProduct['inventory'] - $product['_cart']['quantity']
                         ]);
                     }
                 }
