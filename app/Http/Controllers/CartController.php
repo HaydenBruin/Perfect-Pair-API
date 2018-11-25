@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use App\Cart;
 use App\Product;
 use App\Traits\CartData;
@@ -14,10 +15,11 @@ class CartController extends Controller
 {
     public function getCart(Request $request)
     {
+        $cartData = CartData::getCartData($request->cookie('cart'));
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData($request->cookie('cart'))
+            'cart' => $cartData
         ]);
     }
 

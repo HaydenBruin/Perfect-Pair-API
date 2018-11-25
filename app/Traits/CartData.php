@@ -1,6 +1,7 @@
 <?php
 namespace App\Traits;
 
+use DB;
 use App\Product;
 use Illuminate\Support\Facades\Cookie;
 
@@ -42,18 +43,39 @@ trait CartData {
                     // UPDATE TOTAL PRICING
                     for($i = 0; $i < $cartProduct['quantity']; $i++)
                     {
-                        //$cart['overview']['totalPrice'] += $getProduct->saleprice ? $getProduct->saleprice : $getProduct->price;
-                        //$cart['overview']['totalSavings'] += $getProduct->price - ($getProduct->saleprice ? $getProduct->saleprice : $getProduct->price);
                         $cart['overview']['totalPrice'] += $getProduct->price;
                         $cart['overview']['totalSavings'] = 0;
                         
                     }
                 }
             }
+
+            $discounts = DB::table('discounts')->get();
+            if(@$discounts)
+            {
+                foreach($discounts as $discount)
+                {
+                    if(@$discount->amount)
+                    {
+                        $cart['overview']['totalPrice'] = $cart['overview']['totalPrice'] - $discount->amount;
+                        $cart['overview']['totalSavings'] = $cart['overview']['totalSavings'] + $discount->amount;
+                    }
+                    else if(@$discount->percentage)
+                    {
+                        $cart['overview']['totalSavings'] = ($discount->percentage * $cart['overview']['totalPrice']) / 100;
+                        $cart['overview']['totalPrice'] = $cart['overview']['totalPrice'] - ($discount->percentage * $cart['overview']['totalPrice']) / 100;
+                    }
+                }
+                if($cart['overview']['totalPrice'] <= 0) $cart['overview']['totalPrice'] = 0.00; 
+                if($cart['overview']['totalSavings'] <= 0) $cart['overview']['totalSavings'] = 0.00; 
+                if($cart['overview']['totalFullPrice'] <= 0) $cart['overview']['totalFullPrice'] = 0.00; 
+            }
+
             $cart['overview']['totalPrice'] = number_format($cart['overview']['totalPrice'], 2);
             $cart['overview']['totalSavings'] = number_format($cart['overview']['totalSavings'], 2);
             $cart['overview']['totalFullPrice'] = number_format($cart['overview']['totalSavings'] + $cart['overview']['totalPrice'], 2);
         }
+
         return $cart;
     }
 }
