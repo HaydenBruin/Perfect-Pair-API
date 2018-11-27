@@ -16,8 +16,10 @@ class CreateDiscountsTable extends Migration
         Schema::create('discounts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('code')->nullable();
-            $table->integer('amount')->nullable();
-            $table->integer('percentage')->nullable();
+            $table->string('description')->nullable();
+            $table->string('type')->nullable();
+            $table->integer('discount_value')->nullable();
+            $table->integer('requirement_value')->nullable();
             $table->string('categories')->nullable();
             $table->timestamps();
         });
