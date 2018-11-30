@@ -13,7 +13,7 @@ return [
     */
    
     'supportsCredentials' => true,
-    'allowedOrigins' => ['https://perfectpair.nz','https://test.perfectpair.nz'],
+    'allowedOrigins' => ['http://localhost:3000','https://perfectpair.nz','https://test.perfectpair.nz'],
     'allowedOriginsPatterns' => [],
     'allowedHeaders' => ['*'],
     'allowedMethods' => ['*'],
