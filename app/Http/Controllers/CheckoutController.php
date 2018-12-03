@@ -139,7 +139,7 @@ class CheckoutController extends Controller
             'address' => 'required|string',
             'suburb' => 'required|string',
             'city' => 'required|string',
-            'postcode' => 'required|integer'
+            'postcode' => 'required|integer' 
         ]);
         if ($validator->fails()) {
             return response()->json([
