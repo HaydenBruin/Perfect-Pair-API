@@ -6,7 +6,7 @@
 <?php if(@$checkout['products']) { ?>
     <p>
         <?php foreach($checkout['products'] as $product) { ?>
-            <?php echo $product['quantity']; ?>x <?php echo $product['title']; ?><br/>
+            <?php echo @$product['quantity']; ?>x <?php echo @$product['title']; ?><br/>
         <?php } ?>
     </p>
 <?php } ?>
