@@ -19,6 +19,11 @@ Route::get('/mailable', function () {
 
     //Mail::to(explode(',', env('MAIL_ADMIN')))
     //->queue(new App\Mail\OrderCompleted());
+    $checkoutId = 28;
+    $email_address = "bruinhayden@gmail.com";
+    $orderCompleted = new \App\Mail\OrderCompleted($checkoutId);
 
-    return new App\Mail\OrderCompleted(28);
+    return Mail::to($email_address)
+    ->bcc(explode(',', env('MAIL_ADMIN')))
+    ->send($orderCompleted);
 });

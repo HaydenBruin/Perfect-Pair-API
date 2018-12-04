@@ -14,6 +14,26 @@ class OrderCompleted extends Mailable
 {
     use Queueable, SerializesModels;
 
+
+    private function loadCheckout($checkoutId)
+    {
+        $checkout = array();
+        if(@$checkoutId)
+        {
+            $checkout = (array) DB::table('checkouts')->where(['id' => $checkoutId])->first();
+            $checkout['products'] = DB::table('checkouts_items')->where(['checkoutId' => $checkoutId])->get()->toArray();
+            
+            if(@$checkout['products'])
+            {
+                foreach($checkout['products'] as $index => $productObject)
+                {   
+                    $productDB = (array) DB::table('products')->where(['id' => $productObject->id])->first();
+                    $checkout['products'][$index] = array_merge($productDB,(array) $productObject);
+                }
+            }
+        }
+        return $checkout;
+    }
     /**
      * Create a new message instance.
      *
@@ -21,18 +41,7 @@ class OrderCompleted extends Mailable
      */
     public function __construct($checkoutId)
     {
-        $checkout = (array) DB::table('checkouts')->where(['id' => $checkoutId])->first();
-        $checkout['products'] = DB::table('checkouts_items')->where(['checkoutId' => $checkoutId])->get()->toArray();
-        
-        if(@$checkout['products'])
-        {
-            foreach($checkout['products'] as $index => $productObject)
-            {   
-                $productDB = (array) DB::table('products')->where(['id' => $productObject->id])->first();
-                $checkout['products'][$index] = array_merge($productDB,(array) $productObject);
-            }
-        }
-        $this->checkout = $checkout;
+        $this->checkout = $this->loadCheckout($checkoutId);
     }
 
     /**

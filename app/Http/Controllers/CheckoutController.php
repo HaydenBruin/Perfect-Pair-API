@@ -49,7 +49,7 @@ class CheckoutController extends Controller
         $checkoutId = $request->session()->get('checkoutId');
         $cartData = CartData::getCartData($request->cookie('cart'));
 
-        if(!$request->session()->has('checkoutId') || !@$cartData)
+        if(!$request->session()->has('checkoutId') || !@$cartData || !@$checkoutId)
         {
             return response()->json([
                 'status' => 'failed',
@@ -61,7 +61,7 @@ class CheckoutController extends Controller
         // TAKE PAYMENT
         if(@$request['tokenId'])
         {
-            \Stripe\Stripe::setApiKey('sk_test_nQRGis4oGrHnzm9cVilHhrwf');
+            \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
             $charge = \Stripe\Charge::create(['amount' => ($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
             
             if(@$charge['paid'])
@@ -91,11 +91,11 @@ class CheckoutController extends Controller
                     }
                 }
 
-                if(@$checkout->email_address)
+                if(@$checkoutId && @$checkout->email_address)
                 {
                     Mail::to($checkout->email_address)
                     ->bcc(explode(',', env('MAIL_ADMIN')))
-                    ->queue(new \App\Mail\OrderCompleted($checkout->id));
+                    ->send(new \App\Mail\OrderCompleted($checkoutId));
                 }
 
                 return response()->json([
