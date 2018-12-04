@@ -94,10 +94,8 @@ class CheckoutController extends Controller
                 if(@$checkout->email_address)
                 {
                     Mail::to($checkout->email_address)
-                    ->queue(new \App\Mail\OrderCompleted($checkout));
-
-                    Mail::to(explode(',', env('MAIL_ADMIN')))
-                    ->queue(new \App\Mail\OrderCompletedAdmin($checkout));
+                    ->bcc(explode(',', env('MAIL_ADMIN')))
+                    ->queue(new \App\Mail\OrderCompleted($checkout->id));
                 }
 
                 return response()->json([
