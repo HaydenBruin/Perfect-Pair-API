@@ -20,17 +20,11 @@ class OrderCompleted extends Mailable
         $checkout = array();
         if(@$checkoutId)
         {
-            $checkout = (array) DB::table('checkouts')->where(['id' => $checkoutId])->first();
-            $checkout['products'] = DB::table('checkouts_items')->where(['checkoutId' => $checkoutId])->get()->toArray();
-            
-            if(@$checkout['products'])
-            {
-                foreach($checkout['products'] as $index => $productObject)
-                {   
-                    $productDB = (array) DB::table('products')->where(['id' => $productObject->id])->first();
-                    $checkout['products'][$index] = array_merge($productDB,(array) $productObject);
-                }
-            }
+            $checkout = DB::table('checkouts')->where(['id' => $checkoutId])->first();
+            $checkout->products = DB::table('checkouts_items')
+                ->where(['checkoutId' => $checkoutId])
+                ->leftJoin('products', 'checkouts_items.productId', '=', 'products.id')
+                ->get();
         }
         return $checkout;
     }

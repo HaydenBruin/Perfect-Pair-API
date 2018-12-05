@@ -62,7 +62,7 @@ class CheckoutController extends Controller
         if(@$request['tokenId'])
         {
             \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
-            $charge = \Stripe\Charge::create(['amount' => ($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
+            $charge = \Stripe\Charge::create(['amount' => intval($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
             
             if(@$charge['paid'])
             {
@@ -93,9 +93,11 @@ class CheckoutController extends Controller
 
                 if(@$checkoutId && @$checkout->email_address)
                 {
+                    $orderCompleted = new \App\Mail\OrderCompleted($checkoutId);
+
                     Mail::to($checkout->email_address)
                     ->bcc(explode(',', env('MAIL_ADMIN')))
-                    ->send(new \App\Mail\OrderCompleted($checkoutId));
+                    ->send($orderCompleted);
                 }
 
                 return response()->json([
