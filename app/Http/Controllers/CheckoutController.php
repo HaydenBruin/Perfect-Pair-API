@@ -123,6 +123,8 @@ class CheckoutController extends Controller
 
             } catch (\Stripe\Error\RateLimit $e) {
                 // Too many requests made to the API too quickly
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 
                 return response()->json([
                     'status' => 'failed',
@@ -135,6 +137,8 @@ class CheckoutController extends Controller
                 ]); 
             } catch (\Stripe\Error\InvalidRequest $e) {
                 // Invalid parameters were supplied to Stripe's API
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 
                 return response()->json([
                     'status' => 'failed',
@@ -148,6 +152,8 @@ class CheckoutController extends Controller
             } catch (\Stripe\Error\Authentication $e) {
                 // Authentication with Stripe's API failed
                 // (maybe you changed API keys recently)
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 
                 return response()->json([
                     'status' => 'failed',
@@ -160,6 +166,8 @@ class CheckoutController extends Controller
                 ]); 
             } catch (\Stripe\Error\ApiConnection $e) {
                 // Network communication with Stripe failed
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 
                 return response()->json([
                     'status' => 'failed',
@@ -173,12 +181,16 @@ class CheckoutController extends Controller
             } catch (\Stripe\Error\Base $e) {
                 // Display a very generic error to the user, and maybe send
                 // yourself an email
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 return response()->json([
                     'status' => 'failed',
                     'status_code' => 201,
                     'message' => 'Payment method has failed (GE)'
                 ]); 
             } catch (Exception $e) {
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
                 return response()->json([
                     'status' => 'failed',
                     'status_code' => 201,
