@@ -61,58 +61,136 @@ class CheckoutController extends Controller
         // TAKE PAYMENT
         if(@$request['tokenId'])
         {
-            \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
-            $charge = \Stripe\Charge::create(['amount' => intval($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);
-            
-            if(@$charge['paid'])
-            {
-                $checkout = Checkout::find($checkoutId);
-                $checkout->status = "Success";
-                $checkout->save();
-
-                if(@$cartData['products'])
+            try {
+                \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
+                $charge = \Stripe\Charge::create(['amount' => intval($cartData['overview']['totalPrice'] * 100), 'currency' => 'nzd', 'source' => $request['tokenId']]);     
+                
+                if(@$charge['paid'])
                 {
-                    foreach($cartData['products'] as $product)
+                    $checkout = Checkout::find($checkoutId);
+                    $checkout->status = "Success";
+                    $checkout->save();
+
+                    if(@$cartData['products'])
                     {
-                        $fullProduct = Product::find($product['_cart']['productId']);
+                        foreach($cartData['products'] as $product)
+                        {
+                            $fullProduct = Product::find($product['_cart']['productId']);
 
-                        DB::table('checkouts_items')->insert([
-                            'checkoutId' => $checkoutId,
-                            'productId' => $product['_cart']['productId'],
-                            'quantity' => $product['_cart']['quantity'],
-                            'shipped' => false
-                        ]);
+                            DB::table('checkouts_items')->insert([
+                                'checkoutId' => $checkoutId,
+                                'productId' => $product['_cart']['productId'],
+                                'quantity' => $product['_cart']['quantity'],
+                                'shipped' => false
+                            ]);
 
-                        DB::table('products')
-                        ->where('id', $fullProduct['id'])
-                        ->update([
-                            'inventory' => $fullProduct['inventory'] - $product['_cart']['quantity']
-                        ]);
+                            DB::table('products')
+                            ->where('id', $fullProduct['id'])
+                            ->update([
+                                'inventory' => $fullProduct['inventory'] - $product['_cart']['quantity']
+                            ]);
+                        }
                     }
+
+                    if(@$checkoutId && @$checkout->email_address)
+                    {
+                        $orderCompleted = new \App\Mail\OrderCompleted($checkoutId);
+
+                        Mail::to($checkout->email_address)
+                        ->bcc(explode(',', env('MAIL_ADMIN')))
+                        ->send($orderCompleted);
+                    }
+
+                    return response()->json([
+                        'status' => 'success',
+                        'status_code' => 201,
+                        'message' => 'Checkout order has been created & email saved'
+                    ])->withCookie(Cookie::forget('cart'));
                 }
-
-                if(@$checkoutId && @$checkout->email_address)
-                {
-                    $orderCompleted = new \App\Mail\OrderCompleted($checkoutId);
-
-                    Mail::to($checkout->email_address)
-                    ->bcc(explode(',', env('MAIL_ADMIN')))
-                    ->send($orderCompleted);
-                }
-
-                return response()->json([
-                    'status' => 'success',
-                    'status_code' => 201,
-                    'message' => 'Checkout order has been created & email saved'
-                ])->withCookie(Cookie::forget('cart'));
-            }
-            else {
+            } catch(\Stripe\Error\Card $e) {
+                $body = $e->getJsonBody();
+                $err  = $body['error'];
+                
                 return response()->json([
                     'status' => 'failed',
                     'status_code' => 201,
-                    'message' => 'Payment method has failed'
-                ]);    
+                    'error_status' => @$e->getHttpStatus(),
+                    'message' => @$err['message'],
+                    'param' => @$err['param'],
+                    'code' => @$err['code'],
+                    'type' => @$err['type']
+                ]); 
+
+            } catch (\Stripe\Error\RateLimit $e) {
+                // Too many requests made to the API too quickly
+                
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'error_status' => @$e->getHttpStatus(),
+                    'message' => @$err['message'],
+                    'param' => @$err['param'],
+                    'code' => @$err['code'],
+                    'type' => @$err['type']
+                ]); 
+            } catch (\Stripe\Error\InvalidRequest $e) {
+                // Invalid parameters were supplied to Stripe's API
+                
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'error_status' => @$e->getHttpStatus(),
+                    'message' => @$err['message'],
+                    'param' => @$err['param'],
+                    'code' => @$err['code'],
+                    'type' => @$err['type']
+                ]); 
+            } catch (\Stripe\Error\Authentication $e) {
+                // Authentication with Stripe's API failed
+                // (maybe you changed API keys recently)
+                
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'error_status' => @$e->getHttpStatus(),
+                    'message' => @$err['message'],
+                    'param' => @$err['param'],
+                    'code' => @$err['code'],
+                    'type' => @$err['type']
+                ]); 
+            } catch (\Stripe\Error\ApiConnection $e) {
+                // Network communication with Stripe failed
+                
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'error_status' => @$e->getHttpStatus(),
+                    'message' => @$err['message'],
+                    'param' => @$err['param'],
+                    'code' => @$err['code'],
+                    'type' => @$err['type']
+                ]); 
+            } catch (\Stripe\Error\Base $e) {
+                // Display a very generic error to the user, and maybe send
+                // yourself an email
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'message' => 'Payment method has failed (GE)'
+                ]); 
+            } catch (Exception $e) {
+                return response()->json([
+                    'status' => 'failed',
+                    'status_code' => 201,
+                    'message' => 'Payment method has failed (sf)'
+                ]); 
             }
+            
+            return response()->json([
+                'status' => 'failed',
+                'status_code' => 201,
+                'message' => 'Payment method has failed'
+            ]); 
         }
 
         return response()->json([
