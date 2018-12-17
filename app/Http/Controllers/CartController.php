@@ -29,7 +29,6 @@ class CartController extends Controller
         $cart = json_decode($request->cookie('cart'),true);
         if(@$cart)
         {
-            print_r($cart);
             foreach($cart as $key => $value) {
                 if ($request['productId'] == $value['productId']) {
                     unset($cart[$key]);
@@ -76,7 +75,7 @@ class CartController extends Controller
         ])->cookie('cart', json_encode($cart), time() + (86400 * 30));
     }
 
-    private function updateCartLog($cartData, $ip_address, $cart_json) {
+    private function updateCartLog($cartData, $ip_address = null, $cart_json) {
         
         $cartLog = new CartLogs();
         $cartLog->visitor = $ip_address;
