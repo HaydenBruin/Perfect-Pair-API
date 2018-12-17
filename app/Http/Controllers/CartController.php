@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use DB;
 use App\Cart;
 use App\Product;
+use App\CartLogs;
 use App\Traits\CartData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -28,16 +29,21 @@ class CartController extends Controller
         $cart = json_decode($request->cookie('cart'),true);
         if(@$cart)
         {
+            print_r($cart);
             foreach($cart as $key => $value) {
-                if (in_array($request['productId'], $value)) {
+                if ($request['productId'] == $value['productId']) {
                     unset($cart[$key]);
                 }
             }
         }
+
+        $cartData = CartData::getCartData($cart);
+        $this->updateCartLog($cartData, $request->ip(), json_encode($cart));
+
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData($cart)
+            'cart' => $cartData
         ])->cookie('cart', json_encode($cart), time() + (86400 * 30));
     }
 
@@ -59,11 +65,23 @@ class CartController extends Controller
                 'quantity' => intval($request['quantity'])
             );
         }
-    
+
+        $cartData = CartData::getCartData($cart);
+        $this->updateCartLog($cartData, $request->ip(), json_encode($cart));
+
         return response()->json([
             'status' => 'success',
             'status_code' => 201,
-            'cart' => CartData::getCartData($cart)
+            'cart' => $cartData
         ])->cookie('cart', json_encode($cart), time() + (86400 * 30));
+    }
+
+    private function updateCartLog($cartData, $ip_address, $cart_json) {
+        
+        $cartLog = new CartLogs();
+        $cartLog->visitor = $ip_address;
+        $cartLog->cart_value = number_format($cartData['overview']['totalPrice'],2);
+        $cartLog->cart_data = $cart_json;
+        $cartLog->save();
     }
 }
