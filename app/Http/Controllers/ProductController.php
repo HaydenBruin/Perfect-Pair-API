@@ -12,7 +12,9 @@ class ProductController extends Controller
         return Product::where([
             ['enabled','=','1'],
             ['inventory','>=','1']
-        ])->paginate(50);
+        ])
+        ->orderBy('display_order','desc')
+        ->paginate(50);
     }
 
     public function getProduct(Product $product)

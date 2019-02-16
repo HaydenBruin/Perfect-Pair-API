@@ -16,6 +16,8 @@ class CheckoutController extends Controller
 {
     public function updateEmail(Request $request)
     {
+        $cartData = CartData::getCartData($request->cookie('cart'));
+
         $validator = Validator::make($request->all(), [
             'email_address' => 'required|email'
         ]);
@@ -30,6 +32,8 @@ class CheckoutController extends Controller
         {
             $checkout = new Checkout();
             $checkout->email_address = $request['email_address'];
+            $checkout->checkout_value = number_format($cartData['overview']['totalPrice'],2);
+            $checkout->checkout_data = $request->cookie('cart');
             $checkout->status = "Pending";
             $checkout->save();
 
